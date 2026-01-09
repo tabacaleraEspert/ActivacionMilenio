@@ -21,6 +21,7 @@ export function BrandMoment({ onVideoComplete }: BrandMomentProps) {
   const [videoLoading, setVideoLoading] = useState(true);
   const [videoTimeElapsed, setVideoTimeElapsed] = useState(0);
   const [canSkip, setCanSkip] = useState(false);
+  const [independentTimer, setIndependentTimer] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Seleccionar video aleatorio al montar
@@ -33,6 +34,38 @@ export function BrandMoment({ onVideoComplete }: BrandMomentProps) {
     setVideoLoading(true);
     setVideoError(false);
   }, []);
+
+  // Contador independiente de 15 segundos (no depende del video)
+  useEffect(() => {
+    const SKIP_DELAY = 15; // segundos
+    let intervalId: NodeJS.Timeout;
+    let startTime = Date.now();
+
+    const updateTimer = () => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      setIndependentTimer(elapsed);
+
+      if (elapsed >= SKIP_DELAY && !canSkip) {
+        setCanSkip(true);
+        console.log("✅ Botón de continuar habilitado (15 segundos transcurridos - contador independiente)");
+        if (intervalId) {
+          clearInterval(intervalId);
+        }
+      }
+    };
+
+    // Actualizar cada segundo
+    intervalId = setInterval(updateTimer, 1000);
+    
+    // Actualización inicial
+    updateTimer();
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [canSkip]);
 
   // Verificar que el video existe cuando se selecciona
   useEffect(() => {
@@ -57,7 +90,7 @@ export function BrandMoment({ onVideoComplete }: BrandMomentProps) {
     video.src = selectedVideo;
   }, [selectedVideo]);
 
-  // Trackear tiempo del video para habilitar botón después de 15 segundos
+  // Trackear tiempo del video solo para mostrar (el contador independiente controla canSkip)
   useEffect(() => {
     if (videoRef.current && !videoLoading && !videoError) {
       const video = videoRef.current;
@@ -65,12 +98,6 @@ export function BrandMoment({ onVideoComplete }: BrandMomentProps) {
       const handleTimeUpdate = () => {
         const currentTime = video.currentTime;
         setVideoTimeElapsed(currentTime);
-        
-        // Habilitar botón después de 15 segundos
-        if (currentTime >= 15 && !canSkip) {
-          setCanSkip(true);
-          console.log("✅ Botón de continuar habilitado (15 segundos transcurridos)");
-        }
       };
       
       video.addEventListener('timeupdate', handleTimeUpdate);
@@ -79,7 +106,7 @@ export function BrandMoment({ onVideoComplete }: BrandMomentProps) {
         video.removeEventListener('timeupdate', handleTimeUpdate);
       };
     }
-  }, [videoLoading, videoError, canSkip]);
+  }, [videoLoading, videoError]);
 
   // Intentar siguiente video si falla
   useEffect(() => {
@@ -323,14 +350,14 @@ export function BrandMoment({ onVideoComplete }: BrandMomentProps) {
           </motion.button>
         )}
         
-        {/* Mostrar tiempo transcurrido mientras no se puede saltar */}
-        {!canSkip && !videoLoading && !videoError && (
+        {/* Mostrar tiempo transcurrido mientras no se puede saltar (usar contador independiente) */}
+        {!canSkip && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="mt-4 text-sm text-white/70"
           >
-            {Math.round(videoTimeElapsed)}s / 15s
+            {independentTimer}s / 15s
           </motion.div>
         )}
       </motion.div>
