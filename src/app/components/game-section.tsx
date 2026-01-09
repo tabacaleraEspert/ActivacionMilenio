@@ -30,7 +30,7 @@ export function GameSection({ onGameComplete, assignedPrize }: GameSectionProps)
   const [gameStarted, setGameStarted] = useState(false); // Controla si el juego realmente comenzó
   const [gameFinished, setGameFinished] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null); // 3, 2, 1, null
-  const [timer, setTimer] = useState<number>(15); // Timer de 15 a 0
+  const [timer, setTimer] = useState<number>(60); // Timer en segundos (cambiá este número)
   const [timerActive, setTimerActive] = useState(false);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -67,7 +67,7 @@ export function GameSection({ onGameComplete, assignedPrize }: GameSectionProps)
   const handleStartGame = () => {
     console.log("🎮 Usuario presionó START - Iniciando carga del juego...");
     setIsLoading(true); // Mostrar loading
-    setTimer(15); // Resetear timer a 15
+    setTimer(60); // Resetear timer (debe coincidir con el valor inicial arriba)
     setTimerActive(false); // Asegurar que el timer no esté activo aún
     setCountdown(null); // Resetear countdown
     setGameFinished(false); // Resetear estado de juego terminado
@@ -95,7 +95,7 @@ export function GameSection({ onGameComplete, assignedPrize }: GameSectionProps)
           // Countdown terminó, iniciar el timer
           setTimerActive(true);
           setGameStartTime(Date.now());
-          console.log("⏰ Timer iniciado - 15 segundos");
+          console.log(`⏰ Timer iniciado - ${timer} segundos`);
           return null;
         }
         return prev - 1;
