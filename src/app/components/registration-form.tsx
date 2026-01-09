@@ -16,7 +16,7 @@ interface FormData {
 }
 
 interface RegistrationFormProps {
-  onComplete: (data: FormData) => void;
+  onComplete: (data: FormData) => Promise<void>;
 }
 
 export function RegistrationForm({ onComplete }: RegistrationFormProps) {
@@ -34,10 +34,15 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    // Simulate submission delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsSubmitting(false);
-    onComplete(data);
+    try {
+      // Esperar a que se completen el guardado de datos y la asignación del premio
+      await onComplete(data);
+    } catch (error) {
+      console.error("Error al procesar el formulario:", error);
+      // Aunque haya error, permitir continuar
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const formValues = watch();

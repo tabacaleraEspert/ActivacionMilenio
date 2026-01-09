@@ -71,7 +71,7 @@ export default function App() {
     setCurrentStep("form");
   };
 
-  const handleFormComplete = async (data: FormData) => {
+  const handleFormComplete = async (data: FormData): Promise<void> => {
     // Guardar datos Y asignar premio al mismo tiempo usando Google Apps Script directamente
     // Solución para CORS: usar no-cors para guardar datos y JSONP para obtener premio
     try {
@@ -183,10 +183,10 @@ export default function App() {
     } catch (error) {
       console.error("Error guardando datos o asignando premio:", error);
       // Continuar con el flujo aunque falle
+    } finally {
+      setFormData(data);
+      setCurrentStep("brand");
     }
-    
-    setFormData(data);
-    setCurrentStep("brand");
   };
 
   const handleBrandComplete = () => {
